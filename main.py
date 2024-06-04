@@ -49,26 +49,20 @@ def save_evaluations_to_csv(evaluations, filename="evaluations.csv"):
 text_pairs = generate_text_pairs(20)
 text_pairs = sorted(text_pairs, key=lambda x: x["id"])
 
+# Load existing evaluations
+evaluations_df = load_evaluations()
 
-# Function to reload the evaluated and non-evaluated pairs
-def reload_pairs():
-    evaluations_df = load_evaluations()
-    evaluated_pairs = evaluations_df["text_pair_id"].tolist()
-    non_evaluated_pairs = [
-        pair["id"] for pair in text_pairs if pair["id"] not in evaluated_pairs
-    ]
-    return evaluations_df, evaluated_pairs, non_evaluated_pairs
-
-
-# Load existing evaluations and set up session state
-evaluations_df, evaluated_pairs, non_evaluated_pairs = reload_pairs()
-
+# Initialize session state
 if "current_index" not in st.session_state:
     st.session_state.current_index = 0
 if "evaluated_pairs" not in st.session_state:
-    st.session_state.evaluated_pairs = evaluated_pairs
+    st.session_state.evaluated_pairs = evaluations_df["text_pair_id"].tolist()
 if "non_evaluated_pairs" not in st.session_state:
-    st.session_state.non_evaluated_pairs = non_evaluated_pairs
+    st.session_state.non_evaluated_pairs = [
+        pair["id"]
+        for pair in text_pairs
+        if pair["id"] not in st.session_state.evaluated_pairs
+    ]
 
 # Sidebar
 st.sidebar.header("Text Pairs")
@@ -128,13 +122,24 @@ for metric in metrics:
 # Save evaluation
 def save_evaluation():
     new_eval = pd.DataFrame([evaluation])
-    save_evaluations_to_csv(new_eval, "evaluations.csv")
+    if os.path.exists("evaluations.csv"):
+        existing_df = pd.read_csv("evaluations.csv")
+        existing_df = existing_df[
+            existing_df["text_pair_id"] != evaluation["text_pair_id"]
+        ]
+        updated_df = pd.concat([existing_df, new_eval], ignore_index=True)
+    else:
+        updated_df = new_eval
+    updated_df.sort_values(by=["text_pair_id"], inplace=True)
+    updated_df.to_csv("evaluations.csv", index=False)
+    st.success("Evaluation saved")
 
-    # Reload pairs after saving
-    evaluations_df, evaluated_pairs, non_evaluated_pairs = reload_pairs()
-    st.session_state.evaluated_pairs = evaluated_pairs
-    st.session_state.non_evaluated_pairs = non_evaluated_pairs
-    st.rerun()
+    # Update evaluated and non-evaluated pairs
+    if current_pair["id"] not in st.session_state.evaluated_pairs:
+        st.session_state.evaluated_pairs.append(current_pair["id"])
+    if current_pair["id"] in st.session_state.non_evaluated_pairs:
+        st.session_state.non_evaluated_pairs.remove(current_pair["id"])
+    return updated_df
 
 
 # Navigation buttons
@@ -149,7 +154,8 @@ with col2:
         st.rerun()
 with col3:
     if st.button("Submit Evaluation"):
-        save_evaluation()
+        evaluations_df = save_evaluation()
+        st.rerun()
 
 
 # Add a download button for evaluations.csv
