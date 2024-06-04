@@ -1,3 +1,4 @@
+import base64
 import os
 
 import pandas as pd
@@ -155,6 +156,19 @@ with col3:
     if st.button("Submit Evaluation"):
         evaluations_df = save_evaluation()
         st.rerun()
+
+
+# Add a download button for evaluations.csv
+def file_download_link(df, filename):
+    csv = df.to_csv(index=False)
+    b64 = base64.b64encode(csv.encode()).decode()
+    href = f'<a href="data:file/csv;base64,{b64}" download="{filename}">Download evaluations.csv</a>'
+    return href
+
+
+st.markdown(
+    file_download_link(evaluations_df, "evaluations.csv"), unsafe_allow_html=True
+)
 
 # Display collected evaluations for debugging purposes
 st.write("Collected Evaluations (for debugging):")
