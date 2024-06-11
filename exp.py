@@ -31,7 +31,7 @@ for i, original_line in enumerate(original_lines):
     for model in ModelNames:
         data.append(
             {
-                "text_pair_id": f"{i}",
+                "text_pair_id": i + 1,
                 "Original": original_line.strip(),
                 "Simplified": simplified_lines[model][i].strip(),
                 "Model": model.name,

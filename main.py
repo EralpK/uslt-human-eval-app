@@ -5,18 +5,6 @@ import pandas as pd
 import streamlit as st
 
 
-# Generate simple text pairs
-def generate_text_pairs(num_pairs=20):
-    text_pairs = []
-    for i in range(1, num_pairs + 1):
-        reference_text = f"Reference text {i}"
-        generated_text = f"Generated text {i}"
-        text_pairs.append(
-            {"id": i, "reference": reference_text, "generated": generated_text}
-        )
-    return text_pairs
-
-
 # Load existing evaluations
 def load_evaluations(filename="evaluations.csv"):
     if os.path.exists(filename):
@@ -25,11 +13,12 @@ def load_evaluations(filename="evaluations.csv"):
         return pd.DataFrame(
             columns=[
                 "text_pair_id",
-                "reference",
-                "generated",
+                "original",
+                "simplified",
+                "model",
+                "Adequacy",
                 "Fluency",
-                "Relevance",
-                "Coherence",
+                "Simplicity",
             ]
         )
 
@@ -45,8 +34,14 @@ def save_evaluations_to_csv(evaluations, filename="evaluations.csv"):
     st.success(f"Evaluations saved to {filename}")
 
 
-# Generate 20 text pairs
-text_pairs = generate_text_pairs(20)
+# Load the text pairs from the uploaded file
+file_path = "/mnt/data/evaluations.csv"
+text_pairs = pd.read_csv(file_path)
+text_pairs.rename(
+    columns={"Unnamed: 0": "id", "Original": "original", "Simplified": "simplified"},
+    inplace=True,
+)
+text_pairs = text_pairs.to_dict("records")
 text_pairs = sorted(text_pairs, key=lambda x: x["id"])
 
 # Load existing evaluations
@@ -79,13 +74,13 @@ for pair_id in st.session_state.non_evaluated_pairs:
         st.rerun()
 
 # Metrics
-metrics = ["Fluency", "Relevance", "Coherence"]
+metrics = ["Adequacy", "Fluency", "Simplicity"]
 
 # Display current text pair
 current_pair = text_pairs[st.session_state.current_index]
 st.subheader(f"Text Pair {current_pair['id']}")
-st.write(f"**Reference Text:** {current_pair['reference']}")
-st.write(f"**Generated Text:** {current_pair['generated']}")
+st.write(f"**Original Text:** {current_pair['original']}")
+st.write(f"**Simplified Text:** {current_pair['simplified']}")
 
 # Check if current pair has been evaluated
 existing_evaluation = evaluations_df[
@@ -93,8 +88,9 @@ existing_evaluation = evaluations_df[
 ]
 evaluation = {
     "text_pair_id": current_pair["id"],
-    "reference": current_pair["reference"],
-    "generated": current_pair["generated"],
+    "original": current_pair["original"],
+    "simplified": current_pair["simplified"],
+    "model": current_pair["model"],
 }
 
 # Display evaluation status message
