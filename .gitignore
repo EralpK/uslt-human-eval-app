@@ -166,3 +166,4 @@ __pycache__/
 
 uploaded-data/
 data/
+pyproject.toml
