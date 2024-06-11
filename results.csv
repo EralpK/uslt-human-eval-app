@@ -1,1 +1,6 @@
 id,original_text_id,model_id,adequacy,fluency,simplicity
+1,25,M6,0,0,0
+2,196,M2,0,0,0
+6,4,M6,4,4,4
+8,4,M2,4,4,4
+9,148,M2,0,0,0
