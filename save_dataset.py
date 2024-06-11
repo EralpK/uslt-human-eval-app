@@ -11,7 +11,7 @@ original_file_path = base_dir / "original_text.txt"
 simplified_dir = base_dir / "simplified"
 
 # Read the original text file
-with original_file_path.open("r") as file:
+with original_file_path.open("r", encoding="utf-8") as file:
     original_lines = file.readlines()
 
 # Initialize a dictionary to hold simplified lines
@@ -67,7 +67,7 @@ for i, original_line in enumerate(original_lines):
 
 # Create a DataFrame from the data
 df = pd.DataFrame(data)
-df.to_csv("evalcsv/full/evaluations.csv", index=False)
+df.to_csv("data_full.csv", index=False)
 
 # %%
 our_model = ModelNames.M6  # uslt
@@ -90,10 +90,23 @@ our_df.sort_values("original_text_id", inplace=True)
 compare_df.sort_values("original_text_id", inplace=True)
 
 final = pd.concat([our_df, compare_df])
-final.sort_values("original_text_id", inplace=True)
+
+# shuffle the final dataframe
+final = final.sample(frac=1).reset_index(drop=True)
+
+# check that both models have the same original_text_id
+tmp1 = final[final["model_id"] == our_model.name]["original_text_id"].sort_values()
+tmp2 = final[final["model_id"] == to_compare.name]["original_text_id"].sort_values()
+if not all(tmp1.values == tmp2.values):
+    raise ValueError("Original text ids are not the same for both models.")
+else:
+    print("Original text ids are the same for both models.")
 
 final["id"] = [i for i in range(1, 51)]
-final.to_csv("evaluations.csv", index=False)
+final.sort_values("id", inplace=True)
+
+# %%
+final.to_csv("data.csv", index=False)
 
 
 # %%
