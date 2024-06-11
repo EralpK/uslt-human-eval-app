@@ -43,7 +43,7 @@ def save_evaluation():
         results_df = pd.concat(
             [results_df, pd.DataFrame([evaluation])], ignore_index=True
         )
-    results_df.sort_values("id", inplace=True)
+
     results_df.to_csv("results.csv", index=False)
     st.session_state.results_df = results_df
     st.success("Evaluation saved!")
@@ -52,8 +52,21 @@ def save_evaluation():
     st.markdown(get_table_download_link(results_df), unsafe_allow_html=True)
 
 
+def delete_evaluation():
+    results_df = st.session_state.results_df
+    current_id = int(data.iloc[st.session_state.current_index]["id"])
+
+    if current_id in results_df["id"].values:
+        results_df = results_df[results_df["id"] != current_id]
+        results_df.to_csv("results.csv", index=False)
+        st.session_state.results_df = results_df
+        st.success("Evaluation deleted!")
+    else:
+        st.warning("No evaluation to delete for this text pair.")
+
+
 def get_table_download_link(df: pd.DataFrame):
     csv = df.to_csv(index=False)
     b64 = base64.b64encode(csv.encode()).decode()  # B64 encode
-    href = f'<a href="data:file/csv;base64,{b64}" download="results.csv">Download results.csv</a>'
-    return href
+    href = f'<a class="download-button" href="data:file/csv;base64,{b64}" download="results.csv">Download results.csv</a>'
+    return f'<div style="text-align: center; margin-top: 20px;">{href}</div>'

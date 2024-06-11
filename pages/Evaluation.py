@@ -4,6 +4,7 @@ import pandas as pd
 import streamlit as st
 
 from utils import (
+    delete_evaluation,
     get_table_download_link,
     next_text_pair,
     previous_text_pair,
@@ -159,14 +160,24 @@ def show_evaluation():
         horizontal=True,
     )
 
-    # Save Evaluation button
-    st.button(
-        "Save Evaluation",
-        on_click=save_evaluation,
-        key="save",
-        use_container_width=True,
-        type="primary",
-    )
+    # Action buttons
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        st.button(
+            "Save Evaluation",
+            on_click=save_evaluation,
+            key="save",
+            use_container_width=True,
+            type="primary",
+        )
+    with col2:
+        st.button(
+            "Delete Evaluation",
+            on_click=delete_evaluation,
+            key="delete",
+            use_container_width=True,
+            type="primary",
+        )
 
     # Display current results table at the bottom of the page
     st.write("#### Current Results")
