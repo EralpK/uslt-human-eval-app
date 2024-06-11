@@ -52,7 +52,7 @@ for i, original_line in enumerate(original_lines):
     for model in ModelNames:
         data.append(
             {
-                "text_pair_id": tmp,
+                "id": tmp,
                 "original_text_id": i + 1,
                 "adequacy": None,  # Placeholder for Adequacy
                 "fluency": None,  # Placeholder for Fluency
@@ -92,8 +92,8 @@ compare_df.sort_values("original_text_id", inplace=True)
 final = pd.concat([our_df, compare_df])
 final.sort_values("original_text_id", inplace=True)
 
-final["text_pair_id"] = [i for i in range(1, 51)]
-final.to_csv("evalcsv/aykut/evaluations.csv", index=False)
+final["id"] = [i for i in range(1, 51)]
+final.to_csv("evaluations.csv", index=False)
 
 
 # %%
