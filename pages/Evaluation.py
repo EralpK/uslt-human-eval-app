@@ -1,7 +1,6 @@
-import os
-
-import pandas as pd
 import streamlit as st
+import os
+import pandas as pd
 
 from utils import (
     delete_evaluation,
@@ -9,10 +8,16 @@ from utils import (
     next_text_pair,
     previous_text_pair,
     save_evaluation,
+    add_and_update_evals,
+    delete_and_update_evals,
 )
 
+st.write("# Evaluation")
+st.write("Make sure that you have carefully read the guidelines presented in the Instructions page.")
+
 # Load the CSV file
-file_path = "data.csv"  # Update this to the correct path if needed
+#file_path = "data.csv"  # Update this to the correct path if needed
+file_path = "data_full_supreme.csv"  # Update this to the correct path if needed
 data = pd.read_csv(file_path)
 
 
@@ -129,6 +134,7 @@ def show_evaluation():
         existing_evaluation = st.session_state.results_df[
             st.session_state.results_df["id"] == data.iloc[index]["id"]
         ].iloc[0]
+        st.session_state.model_id = existing_evaluation["model_id"]
         st.session_state.adequacy = int(existing_evaluation["adequacy"])
         st.session_state.fluency = int(existing_evaluation["fluency"])
         st.session_state.simplicity = int(existing_evaluation["simplicity"])
@@ -165,7 +171,8 @@ def show_evaluation():
     with col1:
         st.button(
             "Save Evaluation",
-            on_click=save_evaluation,
+            #on_click=save_evaluation,
+            on_click=add_and_update_evals,
             key="save",
             use_container_width=True,
             type="primary",
@@ -173,7 +180,7 @@ def show_evaluation():
     with col2:
         st.button(
             "Delete Evaluation",
-            on_click=delete_evaluation,
+            on_click=delete_and_update_evals,
             key="delete",
             use_container_width=True,
             type="primary",
@@ -188,5 +195,7 @@ def show_evaluation():
         get_table_download_link(st.session_state.results_df), unsafe_allow_html=True
     )
 
-
-show_evaluation()
+try:
+    show_evaluation()
+except Exception as e:
+    print("Error: ", e)
