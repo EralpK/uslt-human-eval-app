@@ -3,7 +3,10 @@ import base64
 import pandas as pd
 import streamlit as st
 
-data = pd.read_csv("data.csv")
+from datamodule.configs import ModelNames
+
+
+data = pd.read_csv("data_full_supreme.csv")
 
 
 def next_text_pair():
@@ -52,6 +55,53 @@ def save_evaluation():
     st.markdown(get_table_download_link(results_df), unsafe_allow_html=True)
 
 
+def compute_evaluation_avgs():
+    """
+    To compute the mean and standard deviation of model performances.
+    Note that this is only called when either a new evaluation is saved or an evaluation is deleted.
+    Manual insertions and deletions over the results file are not automatically reflected over the average performances.
+    """
+    avg_data = []
+    std_data = []
+    #results = pd.read_csv(results_file_path)
+    results = st.session_state.results_df
+    all_model_ids = results["model_id"].unique()
+    for model in ModelNames:
+        if model.name in all_model_ids:
+            model_id_results = results.loc[results["model_id"]==model.name]
+            adequacy = model_id_results["adequacy"].mean()
+            fluency = model_id_results["fluency"].mean()
+            simplicity = model_id_results["simplicity"].mean()
+            avg_data.append(
+                {
+                    "model_id": model.name,
+                    "adequacy": adequacy,
+                    "fluency": fluency,
+                    "simplicity": simplicity,
+                }
+            )
+            adequacy_std = model_id_results["adequacy"].std()
+            fluency_std = model_id_results["fluency"].std()
+            simplicity_std = model_id_results["simplicity"].std()
+            std_data.append(
+                {
+                    "model_id": model.name,
+                    "adequacy": adequacy_std,
+                    "fluency": fluency_std,
+                    "simplicity": simplicity_std,
+                }
+            )
+    avg_df = pd.DataFrame(avg_data)
+    avg_df.to_csv("model_performances_mean.csv")
+    std_df = pd.DataFrame(std_data)
+    std_df.to_csv("model_performances_std.csv")
+
+
+def add_and_update_evals():
+    save_evaluation()
+    compute_evaluation_avgs()
+
+
 def delete_evaluation():
     results_df = st.session_state.results_df
     current_id = int(data.iloc[st.session_state.current_index]["id"])
@@ -63,6 +113,11 @@ def delete_evaluation():
         st.success("Evaluation deleted!")
     else:
         st.warning("No evaluation to delete for this text pair.")
+
+
+def delete_and_update_evals():
+    delete_evaluation()
+    compute_evaluation_avgs()
 
 
 def get_table_download_link(df: pd.DataFrame):
