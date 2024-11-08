@@ -10,6 +10,7 @@ from utils import (
     previous_text_pair,
     save_evaluation,
     add_and_update_evals,
+    compute_evaluation_avgs,
     delete_and_update_evals,
 )
 
@@ -44,8 +45,7 @@ def show_evaluation():
         st.session_state.results_df = pd.read_csv("results.csv")
 
     # Initialize mean results with empty rows and load it into session state
-    if "mean_df" not in st.session_state:
-        if not os.path.exists("model_performances/results_mean.csv"):
+    if "results_df" not in st.session_state:
             empty_df = pd.DataFrame(
                 columns=[
                     "model_id",
@@ -54,22 +54,12 @@ def show_evaluation():
                     "simplicity",
                 ]
             )
-            empty_df.to_csv("model_performances/results_mean.csv", index=False)
-        st.session_state.mean_df = pd.read_csv("model_performances/results_mean.csv")
-    
-    if "std_df" not in st.session_state:
-        if not os.path.exists("model_performances/results_std.csv"):
-            empty_df = pd.DataFrame(
-                columns=[
-                    "model_id",
-                    "adequacy",
-                    "fluency",
-                    "simplicity",
-                ]
-            )
-            empty_df.to_csv("model_performances/results_std.csv", index=False)
-        st.session_state.std_df = pd.read_csv("model_performances/results_std.csv")    
+            st.session_state.mean_df = empty_df.copy()
+            st.session_state.std_df = empty_df.copy()
 
+    else:
+        compute_evaluation_avgs()
+    
     # Display navigation controls
     st.sidebar.write("### Navigation")
     total_pairs = len(data)
