@@ -92,9 +92,9 @@ def compute_evaluation_avgs():
                     "simplicity": simplicity_std,
                 }
             )
-    avg_df = pd.DataFrame(avg_data)
-    avg_df.to_csv("model_performances/results_mean.csv")
-    st.session_state.avg_df = avg_df
+    mean_df = pd.DataFrame(avg_data)
+    mean_df.to_csv("model_performances/results_mean.csv")
+    st.session_state.mean_df = mean_df
     std_df = pd.DataFrame(std_data)
     std_df.to_csv("model_performances/results_std.csv")
     st.session_state.std_df = pd.DataFrame(std_df)
