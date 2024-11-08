@@ -55,7 +55,7 @@ def show_evaluation():
                 ]
             )
             empty_df.to_csv("model_performances/results_mean.csv", index=False)
-        st.session_state.mean_df = pd.read("model_performances/results_mean.csv")
+        st.session_state.mean_df = pd.read_csv("model_performances/results_mean.csv")
     
     if "std_df" not in st.session_state:
         if not os.path.exists("model_performances/results_std.csv"):
@@ -68,7 +68,7 @@ def show_evaluation():
                 ]
             )
             empty_df.to_csv("model_performances/results_std.csv", index=False)
-        st.session_state.std_df = pd.read("model_performances/results_std.csv")    
+        st.session_state.std_df = pd.read_csv("model_performances/results_std.csv")    
 
     # Display navigation controls
     st.sidebar.write("### Navigation")
@@ -219,6 +219,9 @@ def show_evaluation():
     # Display current results table at the bottom of the page
     st.write("#### Current Results")
     st.write(st.session_state.results_df)
+
+    #st.write("#### Current Averages")
+    #st.write(st.session_state.mean_df)
 
     # Provide a download link for the updated results.csv
     st.markdown(
