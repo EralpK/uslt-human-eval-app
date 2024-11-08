@@ -16,7 +16,6 @@ from utils import (
 
 st.write("# Evaluation")
 st.write("Make sure that you have carefully read the guidelines presented in the Instructions page.")
-st.write("Start")
 
 # Load the CSV file
 #file_path = "data.csv"  # Update this to the correct path if needed
@@ -45,8 +44,6 @@ def show_evaluation():
             empty_df.to_csv("results.csv", index=False)
         st.session_state.results_df = pd.read_csv("results.csv")
 
-    st.write("Results initialized")
-
     # Initialize mean results with empty rows and load it into session state
     if "results_df" not in st.session_state:
             empty_df = pd.DataFrame(
@@ -62,9 +59,7 @@ def show_evaluation():
 
     else:
         compute_evaluation_avgs()
-
-    st.write("Mean and std df initialized")
-
+    
     # Display navigation controls
     st.sidebar.write("### Navigation")
     total_pairs = len(data)
