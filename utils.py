@@ -1,10 +1,11 @@
 import base64
+import io
+import zipfile
 
 import pandas as pd
 import streamlit as st
 
 from datamodule.configs import ModelNames
-
 
 data = pd.read_csv("data_full_supreme.csv")
 
@@ -92,9 +93,11 @@ def compute_evaluation_avgs():
                 }
             )
     avg_df = pd.DataFrame(avg_data)
-    avg_df.to_csv("model_performances_mean.csv")
+    avg_df.to_csv("model_performances/results_mean.csv")
+    st.session_state.avg_df = avg_df
     std_df = pd.DataFrame(std_data)
-    std_df.to_csv("model_performances_std.csv")
+    std_df.to_csv("model_performances/results_std.csv")
+    st.session_state.std_df = pd.DataFrame(std_df)
 
 
 def add_and_update_evals():
@@ -124,4 +127,16 @@ def get_table_download_link(df: pd.DataFrame):
     csv = df.to_csv(index=False)
     b64 = base64.b64encode(csv.encode()).decode()  # B64 encode
     href = f'<a class="download-button" href="data:file/csv;base64,{b64}" download="results.csv">Download results.csv</a>'
+    return f'<div style="text-align: center; margin-top: 20px;">{href}</div>'
+
+def get_performance_table_download_link(df_mean: pd.DataFrame, df_std: pd.DataFrame):
+    mean_csv = df_mean.to_csv(index=False)
+    std_csv = df_std.to_csv(index=False)
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w") as zf:
+        zf.writestr("results_mean.csv", mean_csv)
+        zf.writestr("results_std.csv", std_csv)
+    zip_buffer.seek(0)
+    b64 = base64.b64encode(zip_buffer.read()).decode()
+    href = f'<a class="download-button" href="data:application/zip;base64,{b64}" download="model_performances.zip">Download Model Performances</a>'
     return f'<div style="text-align: center; margin-top: 20px;">{href}</div>'
