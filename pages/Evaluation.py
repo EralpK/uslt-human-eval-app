@@ -5,6 +5,7 @@ import pandas as pd
 from utils import (
     delete_evaluation,
     get_table_download_link,
+    get_performance_table_download_link,
     next_text_pair,
     previous_text_pair,
     save_evaluation,
@@ -41,6 +42,33 @@ def show_evaluation():
             )
             empty_df.to_csv("results.csv", index=False)
         st.session_state.results_df = pd.read_csv("results.csv")
+
+    # Initialize mean results with empty rows and load it into session state
+    if "mean_df" not in st.session_state:
+        if not os.path.exists("model_performances/results_mean.csv"):
+            empty_df = pd.DataFrame(
+                columns=[
+                    "model_id",
+                    "adequacy",
+                    "fluency",
+                    "simplicity",
+                ]
+            )
+            empty_df.to_csv("model_performances/results_mean.csv", index=False)
+        st.session_state.mean_df = pd.read("model_performances/results_mean.csv")
+    
+    if "std_df" not in st.session_state:
+        if not os.path.exists("model_performances/results_std.csv"):
+            empty_df = pd.DataFrame(
+                columns=[
+                    "model_id",
+                    "adequacy",
+                    "fluency",
+                    "simplicity",
+                ]
+            )
+            empty_df.to_csv("model_performances/results_std.csv", index=False)
+        st.session_state.std_df = pd.read("model_performances/results_std.csv")    
 
     # Display navigation controls
     st.sidebar.write("### Navigation")
@@ -119,6 +147,8 @@ def show_evaluation():
             type="primary",
         )
 
+    st.write(f"## Sentence Label: {1+index//11}")
+
     st.write("### Original Text")
     st.write(data.iloc[index]["original"])
 
@@ -193,6 +223,9 @@ def show_evaluation():
     # Provide a download link for the updated results.csv
     st.markdown(
         get_table_download_link(st.session_state.results_df), unsafe_allow_html=True
+    )
+    st.markdown(
+        get_performance_table_download_link(st.session_state.mean_df, st.session_state.std_df), unsafe_allow_html=True
     )
 
 try:
