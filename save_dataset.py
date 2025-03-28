@@ -7,15 +7,18 @@ from datamodule.configs import ModelNames
 
 import random
 
+random.seed(0)
+
 # Directory paths
-base_dir = Path.cwd().joinpath("data/test")
+#base_dir = Path.cwd().joinpath("data/test")
+base_dir = Path.cwd().joinpath("data/val")
 original_file_path = base_dir / "original_text.txt"
 simplified_dir = base_dir / "simplified"
 
 # Read the original text file
 with original_file_path.open("r", encoding="utf-8") as file:
     #original_lines = file.readlines()
-    original_lines = file.readlines()[:10]
+    original_lines = file.readlines()
 
 # Initialize a dictionary to hold simplified lines
 simplified_lines = {model: [] for model in ModelNames}
@@ -25,7 +28,7 @@ for model in ModelNames:
     simplified_file_path = simplified_dir / f"{model.value}.txt"
     with simplified_file_path.open("r") as file:
         #simplified_lines[model] = file.readlines()
-        simplified_lines[model] = file.readlines()[:10]
+        simplified_lines[model] = file.readlines()
 
 # Check if any of the simplified files have a different number of lines than the original file
 
@@ -52,10 +55,10 @@ data = []
 
 # Pair each line from the original text with each corresponding line from the simplified text files
 tmp = 1
-model_names = [model.name for model in ModelNames]
+model_names = [model for model in ModelNames]
 for i, original_line in enumerate(original_lines):
-    #random.shuffle(model_names)
-    for model_name in model_names:
+    random.shuffle(model_names) #comment if you don't want to shuffle amongst the models
+    for model in model_names:
         data.append(
             {
                 "id": tmp,
@@ -63,18 +66,19 @@ for i, original_line in enumerate(original_lines):
                 "adequacy": None,  # Placeholder for Adequacy
                 "fluency": None,  # Placeholder for Fluency
                 "simplicity": None,  # Placeholder for Simplicity
-                "model_id": model_name,
+                "model_id": model.name,
                 "original": original_line.strip(),
                 "simplified": simplified_lines[model][i].strip(),
             }
         )
         tmp += 1
 
-random.shuffle(data)
+#random.shuffle(data) #uncomment if you want to shuffle over all sentences
 
 # Create a DataFrame from the data
 df = pd.DataFrame(data)
 df.to_csv("data_full_supreme.csv", index=False)
+#df.to_csv("data_full.csv", index=False)
 
 # %%
 our_model = ModelNames.M6  # uslt
