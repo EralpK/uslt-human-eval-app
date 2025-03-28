@@ -58,7 +58,7 @@ def show_instructions():
     - The original text might be simple enough, so you might not see a significant difference between the original and simplified versions.
 
     ## Current Problems
-    - You might encounter with absurd characters in the text. This is due to the encoding problem. These characters are generally encountered because of the interpretation of punctuation marks during the simplification process. Please ignore these characters and focus on the text content.
+    - You might encounter with additional whitespaces between words and punctutation marks in some of the simplifications. This is a known issue. Please disregard these, as they have no effect on the content nor the grammar of the text.
 
     Thank you for your participation!
     """
